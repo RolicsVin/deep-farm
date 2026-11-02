@@ -23,6 +23,10 @@ Core="*uid://b1ub3rwkwvhl4"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/py4godot/plugin.cfg")
+
 [file_customization]
 
 folder_colors={
