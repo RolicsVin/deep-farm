@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://baek1lyp2auop"]
+
+[ext_resource type="Script" uid="uid://bgx0cyqwute8m" path="res://assets/visible_scene.gd" id="1_txgwl"]
+[ext_resource type="Script" uid="uid://srejthmud1dp" path="res://core/classes/ui/linear_visible.gd" id="2_n1mpp"]
+
+[node name="VisibleScene" type="ColorRect" unique_id=134337691]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("1_txgwl")
+
+[node name="LinearVisible" type="Node" parent="." unique_id=1017504861]
+script = ExtResource("2_n1mpp")
+speed = 0.5
+metadata/_custom_type_script = "uid://srejthmud1dp"
