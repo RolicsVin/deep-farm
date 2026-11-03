@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Core="*uid://b1ub3rwkwvhl4"
 GlobalTools="*uid://bi6212ypauyhw"
+Data="*uid://dyngiq76w8jak"
 
 [display]
 

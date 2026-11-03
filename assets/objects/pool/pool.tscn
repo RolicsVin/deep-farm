@@ -8,10 +8,20 @@ size = Vector3(2, 0.025, 2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_hf7dp"]
 size = Vector3(1.8652344, 1.8349609, 1.7460938)
 
-[node name="Pool" type="Node3D" unique_id=1331871361 node_paths=PackedStringArray("camera_pos", "pool_colision")]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hpfcs"]
+transparency = 4
+albedo_color = Color(0.14901961, 0.43137255, 0.5568628, 0.43529412)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fqxyq"]
+material = SubResource("StandardMaterial3D_hpfcs")
+size = Vector3(2, 1.7719727, 2)
+
+[node name="Pool" type="Node3D" unique_id=1331871361 node_paths=PackedStringArray("camera_pos", "pool_colision", "water", "pool_timer")]
 script = ExtResource("1_hpfcs")
 camera_pos = NodePath("Marker3D")
 pool_colision = NodePath("Area3D/CollisionShape3D")
+water = NodePath("Water")
+pool_timer = NodePath("Timer")
 metadata/_custom_type_script = "uid://dxaumaex8p1lh"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=99718996]
@@ -41,3 +51,9 @@ shape = SubResource("BoxShape3D_hf7dp")
 
 [node name="Marker3D" type="Marker3D" parent="." unique_id=1330405197]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.421205)
+
+[node name="Water" type="MeshInstance3D" parent="." unique_id=636290783]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8859863, 0.02381885)
+mesh = SubResource("BoxMesh_fqxyq")
+
+[node name="Timer" type="Timer" parent="." unique_id=122384076]

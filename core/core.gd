@@ -1,4 +1,6 @@
-## Ядро игры
+## Ядро игры. 
+## Объединяет в себе инструменты и реализует некоторые свои функции. 
+## Данные в ядре не хранятся. Для этого есть модуль Data. 
 extends Node
 
 var _buffer: Dictionary = {}
@@ -9,6 +11,7 @@ var window_tools: WindowTools = _make_tool("res://core/tools/window_tools.gd", "
 var time_tools: TimeTools = _make_tool("res://core/tools/time_tools.gd", "TimeTools")
 var scene_tools: SceneTools = _make_tool("res://core/tools/scene_tools.gd", "SceneTools")
 var platform_tools: PlatformTools = _make_tool("res://core/tools/platform_tools.gd", "PlatformTools")
+var database_tools: DatabaseTools = _make_tool("res://core/tools/database_tools.gd", "DatabaseTools")
 
 
 func _make_tool(path: String, tool_name: String) -> Node:

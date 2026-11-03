@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bbj15gydsuseh"]
 
 [ext_resource type="PackedScene" uid="uid://bya4wnw302bny" path="res://assets/objects/pool/pool.tscn" id="1_sxf4j"]
+[ext_resource type="PackedScene" uid="uid://c76a8r5ri36af" path="res://assets/entities/fish/fish.tscn" id="2_a2pkv"]
 [ext_resource type="Script" uid="uid://ccjm58lqawh3o" path="res://core/classes/gameplay/pool_camera.gd" id="2_tqkkf"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tqkkf"]
@@ -18,6 +19,10 @@ glow_enabled = true
 [node name="Map" type="Node3D" unique_id=520057233]
 
 [node name="Pool" parent="." unique_id=1331871361 instance=ExtResource("1_sxf4j")]
+
+[node name="Fish" parent="Pool" unique_id=1291533318 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
+pool = NodePath("..")
 
 [node name="Pool2" parent="." unique_id=1321785331 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0)
