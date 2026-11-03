@@ -1,4 +1,4 @@
-extends Control
+class_name Paralax extends Control
 
 @export var strength: float = 10.0
 @export var smoothness: float = 8.0

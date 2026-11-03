@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bya4wnw302bny"]
+
+[ext_resource type="Script" uid="uid://dxaumaex8p1lh" path="res://core/classes/gameplay/pool.gd" id="1_hpfcs"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_hf7dp"]
+size = Vector3(2, 0.025, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hf7dp"]
+size = Vector3(1.8652344, 1.8349609, 1.7460938)
+
+[node name="Pool" type="Node3D" unique_id=1331871361 node_paths=PackedStringArray("camera_pos", "pool_colision")]
+script = ExtResource("1_hpfcs")
+camera_pos = NodePath("Marker3D")
+pool_colision = NodePath("Area3D/CollisionShape3D")
+metadata/_custom_type_script = "uid://dxaumaex8p1lh"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=99718996]
+mesh = SubResource("BoxMesh_hf7dp")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=156400945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+mesh = SubResource("BoxMesh_hf7dp")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="." unique_id=1283629558]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1, 1)
+mesh = SubResource("BoxMesh_hf7dp")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="." unique_id=676270843]
+transform = Transform3D(-4.371139e-08, 1, -4.371139e-08, 0, -4.371139e-08, -1, -1, -4.371139e-08, 1.9106855e-15, 1, 1, 0)
+mesh = SubResource("BoxMesh_hf7dp")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="." unique_id=1655964379]
+transform = Transform3D(-4.371139e-08, 1, -4.371139e-08, 0, -4.371139e-08, -1, -1, -4.371139e-08, 1.9106855e-15, -1, 1, 0)
+mesh = SubResource("BoxMesh_hf7dp")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=1416527179]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1991601620]
+shape = SubResource("BoxShape3D_hf7dp")
+
+[node name="Marker3D" type="Marker3D" parent="." unique_id=1330405197]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -2.421205)

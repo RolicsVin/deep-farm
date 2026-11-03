@@ -1,3 +1,45 @@
 [gd_scene format=3 uid="uid://bbj15gydsuseh"]
 
+[ext_resource type="PackedScene" uid="uid://bya4wnw302bny" path="res://assets/objects/pool/pool.tscn" id="1_sxf4j"]
+[ext_resource type="Script" uid="uid://ccjm58lqawh3o" path="res://core/classes/gameplay/pool_camera.gd" id="2_tqkkf"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tqkkf"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_a2pkv"]
+sky_material = SubResource("ProceduralSkyMaterial_tqkkf")
+
+[sub_resource type="Environment" id="Environment_ph54e"]
+background_mode = 2
+sky = SubResource("Sky_a2pkv")
+glow_enabled = true
+
 [node name="Map" type="Node3D" unique_id=520057233]
+
+[node name="Pool" parent="." unique_id=1331871361 instance=ExtResource("1_sxf4j")]
+
+[node name="Pool2" parent="." unique_id=1321785331 instance=ExtResource("1_sxf4j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+
+[node name="Pool3" parent="." unique_id=457913886 instance=ExtResource("1_sxf4j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+
+[node name="Pool4" parent="." unique_id=1658464137 instance=ExtResource("1_sxf4j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1862812048 node_paths=PackedStringArray("pools")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 1.046645, -2.2594228)
+script = ExtResource("2_tqkkf")
+pools = [NodePath("../Pool"), NodePath("../Pool2"), NodePath("../Pool3"), NodePath("../Pool4")]
+swith_speed = 10.0
+metadata/_custom_type_script = "uid://ccjm58lqawh3o"
+
+[node name="Light" type="Node3D" parent="." unique_id=353894614]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Light" unique_id=824017903]
+environment = SubResource("Environment_ph54e")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Light" unique_id=1031370305]
+transform = Transform3D(-0.96126175, 0.18621787, -0.20322116, 0, 0.7372774, 0.6755902, 0.27563733, 0.649419, -0.7087165, 0, 0, 0)
+shadow_enabled = true
