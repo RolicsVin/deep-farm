@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="deep farm"
+run/main_scene="uid://b4tenftp5x6ly"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
@@ -25,7 +26,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_git/plugin.cfg")
+enabled=PackedStringArray("res://addons/export_to_obfuscate/plugin.cfg", "res://addons/python_syntax/plugin.cfg")
 
 [file_customization]
 

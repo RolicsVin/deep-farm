@@ -3,10 +3,12 @@ extends Node
 
 var _buffer: Dictionary = {}
 
+# Модули
+
+
 
 func _ready() -> void:
-	var a = load("res://core/tools/platform_tools.gd").instantiate()
-	print(a.is_)
+	pass
 
 
 func _print_log(): ## Предупредит, что сейчас печатает ядро игры.
