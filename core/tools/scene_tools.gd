@@ -1,4 +1,4 @@
-extends Node
+class_name SceneTools extends Node
 
 const SAVE_PATH: String = 'user://'
 

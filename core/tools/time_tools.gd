@@ -1,4 +1,4 @@
-extends Node
+class_name TimeTools extends Node
 
 
 func get_date() -> String:

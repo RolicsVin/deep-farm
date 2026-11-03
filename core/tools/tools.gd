@@ -1,4 +1,4 @@
-extends Node
+class_name GTTools extends Node
 
 
 func read_lines(path: String) -> Array[String]: ## Аналог read_lines из python. Прочитает файл и вернёт список из строк

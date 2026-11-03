@@ -1,4 +1,4 @@
-extends Node
+class_name WindowTools extends Node
 
 
 func take_screenshot() -> Image:

@@ -18,11 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 Core="*uid://b1ub3rwkwvhl4"
-Tools="*uid://bwx5or3ogd7u0"
-WindowTools="*uid://ukwvlciu3jdo"
-TimeTools="*uid://cncl8kpigid0x"
-SceneTools="*uid://7e6b42h11ide"
-PlatformTools="*uid://cqril5jr1bf4c"
 
 [display]
 
