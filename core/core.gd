@@ -4,11 +4,15 @@ extends Node
 var _buffer: Dictionary = {}
 
 # Модули
-
+var tools = Tools
+var window_tools = WindowTools
+var time_tools = TimeTools
+var scene_tools = SceneTools
+var platform_tools = PlatformTools
 
 
 func _ready() -> void:
-	pass
+	print(tools)
 
 
 func _print_log(): ## Предупредит, что сейчас печатает ядро игры.

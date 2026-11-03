@@ -1,3 +1,6 @@
+extends Node
+
+
 func get_date() -> String:
 	var date = Time.get_datetime_dict_from_system()
 	return "%02d.%02d.%04d" % [date.day, date.month, date.year]

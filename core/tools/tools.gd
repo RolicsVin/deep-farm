@@ -1,3 +1,6 @@
+extends Node
+
+
 func read_lines(path: String) -> Array[String]: ## Аналог read_lines из python. Прочитает файл и вернёт список из строк
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
