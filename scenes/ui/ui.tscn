@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bg4kdho4sckfb" path="res://scenes/ui/ui.gd" id="1_u7n8c"]
 
-[node name="UI" type="Control" unique_id=932424315]
+[node name="UI" type="Control" unique_id=932424315 node_paths=PackedStringArray("recovy_button")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,6 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_u7n8c")
+recovy_button = NodePath("Panel/VBoxContainer/Button")
 
 [node name="Panel" type="Panel" parent="." unique_id=1822799451]
 layout_mode = 1
@@ -29,7 +30,9 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 18.0
+offset_top = 12.0
 offset_right = -18.0
+offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -68,7 +71,16 @@ text = "Кормление"
 [node name="feething" type="HSlider" parent="Panel/VBoxContainer" unique_id=846876822]
 layout_mode = 2
 
+[node name="Label6" type="Label" parent="Panel/VBoxContainer" unique_id=551886496]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Button" type="Button" parent="Panel/VBoxContainer" unique_id=1893778749]
+layout_mode = 2
+text = "Запустить восстановление"
+
 [connection signal="value_changed" from="Panel/VBoxContainer/t" to="." method="set_temperature"]
 [connection signal="value_changed" from="Panel/VBoxContainer/filter" to="." method="set_filtration"]
 [connection signal="value_changed" from="Panel/VBoxContainer/o" to="." method="set_oxygen"]
 [connection signal="value_changed" from="Panel/VBoxContainer/feething" to="." method="set_feeding"]
+[connection signal="pressed" from="Panel/VBoxContainer/Button" to="." method="recove"]

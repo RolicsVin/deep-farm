@@ -5,6 +5,8 @@ extends Control
 @export var swipe_min_distance: float = 80.0 ## Минимальная длина свайпа в пикселях
 @export var slide_time: float = 0.35 ## Длительность анимации панели в секундах
 
+@export var recovy_button: Button ## Кнопка, которая запускает восстановление бассейна
+
 var pool: Pool
 
 var _shown := false ## Опущена ли панель сейчас
@@ -44,6 +46,7 @@ func _input(event: InputEvent) -> void:
 			_begin_swipe(event.position)
 		else:
 			_end_swipe(event.position)
+	
 	# Мышь (зажать ЛКМ и потянуть - работает на ПК)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
@@ -112,26 +115,75 @@ func _snap() -> void:
 
 
 func set_pool(_pool: Pool) -> void: ## Установит бассейн для редактирвоания
-	pool = _pool
+	if pool:
+		pool.state_change.disconnect(update_ui)
 	
-	# Установка значений
+	pool = _pool
+	pool.state_change.connect(update_ui)
+	
+	update_ui()
+
+
+
+func update_ui(_args=null) -> void: ## обновит состояние этого ui
+	update_states()
+	chech_pool_state()
+
+
+func update_states() -> void: ## Обновит состояние ползунков
 	$Panel/VBoxContainer/t.value = pool.curent_temperature
-	$Panel/VBoxContainer/filter.value = pool.curent_filtration
-	$Panel/VBoxContainer/o.value = pool.curent_oxygen
+	$Panel/VBoxContainer/filter.value = pool.curent_filtration * 100
+	$Panel/VBoxContainer/o.value = pool.curent_oxygen * 100
 	$Panel/VBoxContainer/feething.value = pool.curent_feeding
+	
+	# Если бассейн не разрушен, то ползунки блокируются иначе ползунки доступны
+	if pool.get_state() != Pool.states.DEFEAT:
+		$Panel/VBoxContainer/t.editable = false
+		$Panel/VBoxContainer/filter.editable = false
+		$Panel/VBoxContainer/o.editable = false
+		$Panel/VBoxContainer/feething.editable = false
+	else:
+		$Panel/VBoxContainer/t.editable = true
+		$Panel/VBoxContainer/filter.editable = true
+		$Panel/VBoxContainer/o.editable = true
+		$Panel/VBoxContainer/feething.editable = true
 
 
-func set_temperature(t: int): ## Установит температуру для текущего бассейна
+func set_temperature(t: int) -> void: ## Установит температуру для текущего бассейна
 	pool.curent_temperature = int(t)
 
 
-func set_filtration(f: float): ## Установит фильтрацию для текущего бассейна
+func set_filtration(f: float) -> void: ## Установит фильтрацию для текущего бассейна
 	pool.curent_filtration = f / 100
 
 
-func set_oxygen(o: float): ## Установит кислород для текущего бассейна
+func set_oxygen(o: float) -> void: ## Установит кислород для текущего бассейна
 	pool.curent_oxygen = o / 100
 
 
-func set_feeding(f: int): ## Установит кормление для текущего бассейна
+func set_feeding(f: int) -> void: ## Установит кормление для текущего бассейна
 	pool.curent_feeding = int(f)
+
+
+func recove() -> void: ## Запустит восстановление бассейна, если с ним всё в порядке
+	pool.start_stabilization()
+	chech_pool_state()
+
+
+func chech_pool_state() -> void: ## Проверяет состояние бассейна и устанавливает состояние кнопки
+	match pool.curent_state:
+		Pool.states.DEFEAT:
+			recovy_button.disabled = true
+			recovy_button.text = 'Восстановление невозможно: проверте параметры бассейна'
+		
+		Pool.states.RECOVERED:
+			recovy_button.disabled = false
+			recovy_button.text = 'Можно начинать стабилизацию'
+			
+		Pool.states.STABILISATION:
+			recovy_button.disabled = true
+			recovy_button.text = 'Восстанавливается...'
+		
+		Pool.states.NORMAL:
+			recovy_button.disabled = true
+			recovy_button.text = 'Уже восстановленно'

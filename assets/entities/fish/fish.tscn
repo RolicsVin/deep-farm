@@ -8,6 +8,7 @@ size = Vector3(0.3154297, 0.103515625, 0.123046875)
 [node name="Fish" type="CharacterBody3D" unique_id=1291533318 node_paths=PackedStringArray("brain_timer")]
 script = ExtResource("1_uj3kj")
 brain_timer = NodePath("Timer")
+money = 5
 metadata/_custom_type_script = "uid://dpd55axow2fj2"
 
 [node name="Timer" type="Timer" parent="." unique_id=421168613]

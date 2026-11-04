@@ -3,6 +3,7 @@ class_name PoolCamera extends Camera3D
 @export var pools: Array[Pool]
 @export var swith_speed: float = 1.0
 @export var swipe_min_distance: float = 80.0  # минимальная длина свайпа в пикселях
+@export var ui: Control ## Ползовательский интерфейс, для редактирования бассейна
 var curent_pool: Pool
 
 var _swipe_start := Vector2.ZERO
@@ -11,6 +12,7 @@ var _swiping := false
 
 func _ready() -> void:
 	curent_pool = pools[0]
+	ui.set_pool(curent_pool)
 
 
 func _physics_process(delta: float) -> void:
@@ -55,3 +57,4 @@ func _end_swipe(pos: Vector2) -> void:
 func _switch_pool(step: int) -> void:
 	var i := clampi(pools.find(curent_pool) + step, 0, pools.size() - 1)
 	curent_pool = pools[i]
+	ui.set_pool(curent_pool)

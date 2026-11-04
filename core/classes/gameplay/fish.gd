@@ -11,12 +11,13 @@ const REQUIRED_FILTRATION = 0.9 ## Индекс необходимой филь�
 const REQUIRED_OXYGEN = 0.98 ## Индекс необходимого кислорода для жизнедеятельности
 const REQUIRED_FEEDING = 5 ## Необходимое кормление для жизнедеятельности
 
-
 enum states {NORMAl, DAMAGET, DEAD}
 var current_state = states.NORMAl
 
 @export var brain_timer: Timer
 @export var pool: Pool
+
+@export var money: int ## Монеты, которые будет приносить рыба
 
 var next_pos: Vector3
 

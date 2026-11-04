@@ -20,6 +20,7 @@ glow_enabled = true
 [node name="Map" type="Node3D" unique_id=520057233]
 
 [node name="Pool" parent="." unique_id=1331871361 instance=ExtResource("1_sxf4j")]
+time_stabilization = 1
 
 [node name="Fish" parent="Pool" unique_id=1291533318 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
@@ -34,11 +35,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0)
 [node name="Pool4" parent="." unique_id=1658464137 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 0)
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1862812048 node_paths=PackedStringArray("pools")]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1862812048 node_paths=PackedStringArray("pools", "ui")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.9996164, -2.4214544)
 script = ExtResource("2_tqkkf")
 pools = [NodePath("../Pool"), NodePath("../Pool2"), NodePath("../Pool3"), NodePath("../Pool4")]
 swith_speed = 10.0
+ui = NodePath("../UI")
 metadata/_custom_type_script = "uid://ccjm58lqawh3o"
 
 [node name="Light" type="Node3D" parent="." unique_id=353894614]
