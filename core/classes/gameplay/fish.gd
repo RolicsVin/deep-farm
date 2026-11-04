@@ -80,6 +80,9 @@ func fish_logic(delta: float) -> void:
 				pool.pool_colision.global_position.y + (pool.pool_colision.shape.size.y / 2),
 				(speed / 2) * delta
 				)
+	
+	# поворот
+	pass # было бы круто реализовать отслеживание изменение позиции и поворачивать рыбу в сторону движения
 
 
 func choise() -> void:
