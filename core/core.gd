@@ -88,7 +88,7 @@ func load_data() -> void:
 			save_resource = CoreSaveData.new()
 			save_resource.saved_at = legacy_data.last_saved_at
 			save_resource.modules["Economy"] = legacy_data
-			elapsed = maxi(0, int(Time.get_unix_time_from_system()) - legacy_data.last_saved_at)
+			elapsed = legacy_data.last_saved_at > 0 ? maxi(0, int(Time.get_unix_time_from_system()) - legacy_data.last_saved_at) : 0
 		else:
 			save_resource = CoreSaveData.new()
 
@@ -104,6 +104,8 @@ func _notification(what: int) -> void:
 		return
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
 		save_data()
+	elif what == NOTIFICATION_APPLICATION_RESUMED:
+		load_data()
 
 
 func _print_log():
