@@ -76,7 +76,7 @@ func load_data() -> void:
 	var elapsed: int = 0
 
 	if ResourceLoader.exists(SAVE_PATH):
-		save_resource = ResourceLoader.load(SAVE_PATH) as CoreSaveData
+		save_resource = ResourceLoader.load(SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as CoreSaveData
 		if not is_instance_valid(save_resource):
 			push_error("Core: файл сохранения повреждён или имеет неверный формат.")
 			return
@@ -85,7 +85,7 @@ func load_data() -> void:
 		# Однократная совместимость с прежним сохранением экономики.
 		var legacy_data: EconomyData
 		if ResourceLoader.exists(LEGACY_ECONOMY_SAVE_PATH):
-			legacy_data = ResourceLoader.load(LEGACY_ECONOMY_SAVE_PATH) as EconomyData
+			legacy_data = ResourceLoader.load(LEGACY_ECONOMY_SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as EconomyData
 		if is_instance_valid(legacy_data):
 			save_resource = CoreSaveData.new()
 			save_resource.saved_at = legacy_data.last_saved_at
