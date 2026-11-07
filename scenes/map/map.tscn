@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://c76a8r5ri36af" path="res://assets/entities/fish/fish.tscn" id="2_a2pkv"]
 [ext_resource type="Script" uid="uid://ccjm58lqawh3o" path="res://core/classes/gameplay/pool_camera.gd" id="2_tqkkf"]
 [ext_resource type="PackedScene" uid="uid://6a54va7w173e" path="res://scenes/ui/ui.tscn" id="4_ph54e"]
-[ext_resource type="Script" path="res://scenes/ui/economy_hud.gd" id="5_economy"]
+[ext_resource type="Script" uid="uid://c5ny55onhi0x1" path="res://scenes/ui/economy_hud.gd" id="5_economy"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tqkkf"]
 sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -110,5 +110,5 @@ shadow_enabled = true
 
 [node name="UI" parent="." unique_id=932424315 instance=ExtResource("4_ph54e")]
 
-[node name="EconomyHUD" type="CanvasLayer" parent="."]
+[node name="EconomyHUD" type="CanvasLayer" parent="." unique_id=611723749]
 script = ExtResource("5_economy")
