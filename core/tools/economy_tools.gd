@@ -127,7 +127,7 @@ func load_data(saved_data: Variant, offline_seconds: int = 0) -> void:
 			continue
 
 		var pool_snapshot: Dictionary = saved_pool_states[pool_path]
-		var saved_state := int(pool_snapshot.get("state", Pool.states.RECOVERED))
+		var saved_state: Pool.states = int(pool_snapshot.get("state", Pool.states.RECOVERED))
 		var remaining := maxf(0.0, float(pool_snapshot.get("stabilization_remaining", 0.0)))
 		var fish_income := _get_pool_income(pool)
 
