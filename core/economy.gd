@@ -14,6 +14,7 @@ var offline_income: int = 0
 
 var _fractional_income: float = 0.0
 var _registered_pools: Array[Pool] = []
+var _automated_pool_paths := PackedStringArray()
 var _save_elapsed: float = 0.0
 var _last_saved_at: int = 0
 
@@ -45,8 +46,14 @@ func register_pool(pool: Pool) -> void:
 
 	_registered_pools.append(pool)
 	if not pool.state_change.is_connected(_on_pool_state_changed):
-		pool.state_change.connect(_on_pool_state_changed)
+		pool.state_change.connect(_on_pool_state_changed.bind(pool))
 	pool.tree_exiting.connect(unregister_pool.bind(pool))
+
+	# Состояние автоматизации сохраняется между запусками игры.
+	var pool_path := str(pool.get_path())
+	if _automated_pool_paths.has(pool_path):
+		pool.curent_state = Pool.states.NORMAL
+
 	_recalculate_income()
 
 
@@ -55,8 +62,16 @@ func unregister_pool(pool: Pool) -> void:
 	_recalculate_income()
 
 
-func _on_pool_state_changed(_state: Pool.states) -> void:
+func _on_pool_state_changed(state: Pool.states, pool: Pool) -> void:
+	var pool_path := str(pool.get_path())
+	if state == Pool.states.NORMAL:
+		if not _automated_pool_paths.has(pool_path):
+			_automated_pool_paths.append(pool_path)
+	else:
+		_automated_pool_paths.erase(pool_path)
+
 	_recalculate_income()
+	_save()
 
 
 func _recalculate_income() -> void:
@@ -112,6 +127,7 @@ func _load_save() -> void:
 	balance = maxi(0, int(config.get_value("economy", "balance", 0)))
 	pending_income = maxi(0, int(config.get_value("economy", "pending_income", 0)))
 	income_per_minute = maxf(0.0, float(config.get_value("economy", "income_per_minute", 0.0)))
+	_automated_pool_paths = config.get_value("economy", "automated_pool_paths", PackedStringArray())
 	_last_saved_at = int(config.get_value("economy", "last_saved_at", 0))
 
 
@@ -120,6 +136,7 @@ func _save() -> void:
 	config.set_value("economy", "balance", balance)
 	config.set_value("economy", "pending_income", pending_income)
 	config.set_value("economy", "income_per_minute", income_per_minute)
+	config.set_value("economy", "automated_pool_paths", _automated_pool_paths)
 	config.set_value("economy", "last_saved_at", int(Time.get_unix_time_from_system()))
 
 	var error := config.save(SAVE_PATH)
