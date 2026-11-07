@@ -40,6 +40,8 @@ pool = NodePath("..")
 
 [node name="Pool2" parent="." unique_id=1321785331 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+curent_temperature = 7
+time_stabilization = 10
 
 [node name="Fish6" parent="Pool2" unique_id=901369678 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35051647, 0.57073784, 0.2770384)
@@ -55,6 +57,7 @@ pool = NodePath("..")
 
 [node name="Pool3" parent="." unique_id=457913886 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
+curent_temperature = 62
 
 [node name="Fish8" parent="Pool3" unique_id=1616690653 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.82034254, 0.6943569, 0.2770384)
@@ -70,6 +73,7 @@ pool = NodePath("..")
 
 [node name="Pool4" parent="." unique_id=1658464137 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, 0)
+curent_oxygen = 0.03
 
 [node name="Fish9" parent="Pool4" unique_id=1062328161 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35051647, 1.011425, 0.2770384)
