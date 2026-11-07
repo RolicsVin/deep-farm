@@ -1,9 +1,7 @@
 ## Ядро игры.
-## Объединяет инструменты и игровые модули, а также централизованно управляет сохранениями.
+## Объединяет игровые модули и централизованно управляет SQL-сохранениями.
 extends Node
 
-const SAVE_PATH := "user://save_data.tres"
-const LEGACY_ECONOMY_SAVE_PATH := "user://economy_data.tres"
 const SAVE_INTERVAL := 15.0
 
 var _buffer: Dictionary = {}
@@ -30,8 +28,7 @@ func _make_tool(path: String, tool_name: String) -> Node:
 
 
 func _ready() -> void:
-	# Автозагрузка Core выполняется раньше основной сцены.
-	# Даём сцене Map и её бассейнам завершить _ready(), прежде чем раздавать сохранённые данные.
+	# Сцена Map и её бассейны должны завершить _ready() до загрузки модульных данных.
 	call_deferred("_load_after_scene_ready")
 
 
@@ -60,58 +57,49 @@ func _get_modules() -> Array[Node]:
 
 
 func save_data() -> void:
-	var save_resource := CoreSaveData.new()
-	save_resource.saved_at = int(Time.get_unix_time_from_system())
-
+	var modules_data: Dictionary = {}
 	for module in _get_modules():
-		save_resource.modules[module.name] = module.get_save_data()
+		modules_data[module.name] = module.get_save_data()
 
-	var error := ResourceSaver.save(save_resource, SAVE_PATH)
-	if error != OK:
-		push_error("Core: не удалось сохранить игру. Код ошибки: %s" % error)
+	var saved_at := int(Time.get_unix_time_from_system())
+	if not database_tools.save_game_data(modules_data, saved_at):
+		push_error("Core: не удалось сохранить игровые данные в SQLite.")
 
 
 func load_data() -> void:
-	var save_resource: CoreSaveData
-	var elapsed: int = 0
+	var save_record := database_tools.load_game_data()
+	var modules_data: Dictionary = save_record.get("modules", {})
+	var saved_at := int(save_record.get("saved_at", 0))
+	var elapsed := 0
 
-	if ResourceLoader.exists(SAVE_PATH):
-		save_resource = ResourceLoader.load(SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as CoreSaveData
-		if not is_instance_valid(save_resource):
-			push_error("Core: файл сохранения повреждён или имеет неверный формат.")
-			return
-		elapsed = maxi(0, int(Time.get_unix_time_from_system()) - save_resource.saved_at)
-	else:
-		# Однократная совместимость с прежним сохранением экономики.
-		var legacy_data: EconomyData
-		if ResourceLoader.exists(LEGACY_ECONOMY_SAVE_PATH):
-			legacy_data = ResourceLoader.load(LEGACY_ECONOMY_SAVE_PATH, "", ResourceLoader.CACHE_MODE_IGNORE) as EconomyData
-		if is_instance_valid(legacy_data):
-			save_resource = CoreSaveData.new()
-			save_resource.saved_at = legacy_data.last_saved_at
-			save_resource.modules["Economy"] = legacy_data
-			if legacy_data.last_saved_at > 0:
-				elapsed = maxi(0, int(Time.get_unix_time_from_system()) - legacy_data.last_saved_at)
-		else:
-			save_resource = CoreSaveData.new()
+	if saved_at > 0:
+		elapsed = maxi(0, int(Time.get_unix_time_from_system()) - saved_at)
 
 	for module in _get_modules():
-		module.load_data(save_resource.modules.get(module.name), elapsed)
+		module.load_data(modules_data.get(module.name, {}), elapsed)
 
 	_data_loaded = true
+	# Сразу фиксируем timestamp после расчёта офлайн-прогресса:
+	# повторный вызов load_data не начислит тот же офлайн-доход повторно.
 	save_data()
 
 
 func _notification(what: int) -> void:
 	if not _data_loaded:
 		return
+
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
 		save_data()
 	elif what == NOTIFICATION_APPLICATION_RESUMED:
 		load_data()
 
 
-func _print_log():
+func _exit_tree() -> void:
+	if is_instance_valid(database_tools):
+		database_tools.close_database()
+
+
+func _print_log() -> void:
 	print("Печатает ядро игры. (core.gd)")
 
 
@@ -131,7 +119,7 @@ func clear_buffer() -> void:
 	_buffer.clear()
 
 
-func push_fatal_error(message: String):
+func push_fatal_error(message: String) -> void:
 	print(message)
 	push_error(message)
 	Engine.get_main_loop().quit()
