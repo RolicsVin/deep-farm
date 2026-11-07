@@ -115,21 +115,21 @@ func load_data(saved_data: Resource, offline_seconds: int = 0) -> void:
 		var pool_path := str(pool.get_path())
 		if has_pool_snapshots and data.pool_states.has(pool_path):
 			var pool_snapshot: Dictionary = data.pool_states[pool_path]
-			var saved_state: Pool.states = int(pool_snapshot.get("state", Pool.states.RECOVERED))
+			var saved_state := int(pool_snapshot.get("state", Pool.states.RECOVERED))
 			var remaining := maxf(0.0, float(pool_snapshot.get("stabilization_remaining", 0.0)))
 			var fish_income := _get_pool_income(pool)
 
 			if saved_state == Pool.states.NORMAL:
 				offline_earned += fish_income * float(offline_seconds) / 60.0
-				pool.restore_saved_state(Pool.states.NORMAL, 0.0)
+				pool.restore_saved_state(Pool.states.NORMAL, 0.0, pool_snapshot)
 			elif saved_state == Pool.states.STABILISATION:
 				if float(offline_seconds) >= remaining:
 					offline_earned += fish_income * (float(offline_seconds) - remaining) / 60.0
 					pool.restore_saved_state(Pool.states.NORMAL, 0.0)
 				else:
-					pool.restore_saved_state(Pool.states.STABILISATION, remaining - float(offline_seconds))
+					pool.restore_saved_state(Pool.states.STABILISATION, remaining - float(offline_seconds), pool_snapshot)
 			else:
-				pool.restore_saved_state(saved_state, 0.0)
+				pool.restore_saved_state(saved_state, 0.0, pool_snapshot)
 		elif not has_pool_snapshots and data.automated_pool_paths.has(pool_path):
 			# Старый формат хранил только список работающих бассейнов и общую ставку.
 			pool.restore_saved_state(Pool.states.NORMAL, 0.0)
