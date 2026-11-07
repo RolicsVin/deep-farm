@@ -6,6 +6,7 @@ const DATABASE_PATH := "user://deep_farm.db"
 
 var db: SQLite = SQLite.new()
 var is_open: bool = false
+var last_load_success: bool = false
 
 
 func _ready() -> void:
@@ -29,7 +30,7 @@ func open_database() -> bool:
 			modules_json TEXT NOT NULL
 		);
 	"""):
-		push_error("DatabaseTools: не удалось создать таблицу game_save.")
+		push_error("DatabaseTools: не удалось создать таблицу game_save. " + db.error_message)
 		db.close_db()
 		is_open = false
 		return false
@@ -43,7 +44,7 @@ func save_game_data(modules: Dictionary, saved_at: int) -> bool:
 
 	var modules_json := JSON.stringify(modules)
 	if not db.query("BEGIN TRANSACTION;"):
-		push_error("DatabaseTools: не удалось начать транзакцию сохранения.")
+		push_error("DatabaseTools: не удалось начать транзакцию сохранения. " + db.error_message)
 		return false
 
 	var query_ok := db.query_with_bindings(
@@ -53,26 +54,28 @@ func save_game_data(modules: Dictionary, saved_at: int) -> bool:
 
 	if not query_ok:
 		db.query("ROLLBACK;")
-		push_error("DatabaseTools: не удалось записать данные игры.")
+		push_error("DatabaseTools: не удалось записать данные игры. " + db.error_message)
 		return false
 
 	if not db.query("COMMIT;"):
 		db.query("ROLLBACK;")
-		push_error("DatabaseTools: не удалось завершить транзакцию сохранения.")
+		push_error("DatabaseTools: не удалось завершить транзакцию сохранения. " + db.error_message)
 		return false
 
 	return true
 
 
 func load_game_data() -> Dictionary:
+	last_load_success = false
 	if not open_database():
 		return {}
 
 	if not db.query("SELECT saved_at, modules_json FROM game_save WHERE id = 1;"):
-		push_error("DatabaseTools: ошибка чтения сохранения.")
+		push_error("DatabaseTools: ошибка чтения сохранения. " + db.error_message)
 		return {}
 
 	if db.query_result.is_empty():
+		last_load_success = true
 		return {}
 
 	var row: Dictionary = db.query_result[0]
@@ -82,6 +85,7 @@ func load_game_data() -> Dictionary:
 		push_error("DatabaseTools: сохранение содержит некорректный JSON.")
 		return {}
 
+	last_load_success = true
 	return {
 		"saved_at": int(row.get("saved_at", 0)),
 		"modules": json.data
