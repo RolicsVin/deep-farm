@@ -23,8 +23,9 @@ var current_state = states.NORMAl
 var next_pos: Vector3
 var fish_material: StandardMaterial3D
 
-const SURFACE_SPEED_MULTIPLIER := 0.1
 const TURN_SPEED := 4.0
+const SURFACE_OFFSET := 0.08
+const SURFACE_REACHED_TOLERANCE := 0.02
 
 
 func _ready() -> void:
@@ -95,26 +96,35 @@ func _physics_process(delta: float) -> void:
 
 
 func fish_logic(delta: float) -> void:
+	# При нехватке кислорода рыба всплывает строго вертикально.
+	# Достигнув поверхности, полностью прекращает движение.
+	if pool.curent_oxygen < REQUIRED_OXYGEN:
+		var box := pool.pool_colision.shape as BoxShape3D
+		var surface_local := Vector3(0.0, box.size.y / 2.0, 0.0)
+		var surface_global := pool.pool_colision.global_transform * surface_local
+		var surface_y := surface_global.y - SURFACE_OFFSET
+
+		if global_position.y >= surface_y - SURFACE_REACHED_TOLERANCE:
+			global_position.y = surface_y
+			return
+
+		global_position.y = move_toward(
+			global_position.y,
+			surface_y,
+			speed * delta
+		)
+		return
+
 	var movement_speed := speed
 
 	# Недостаточная фильтрация делает рыб вялыми.
 	if pool.curent_filtration < REQUIRED_FILTRATION:
 		movement_speed *= 0.35
 
-	var target := next_pos
-
-	# При нехватке кислорода рыба всплывает и затем медленно дрейфует
-	# у поверхности, словно пассивно плавающее тело.
-	if pool.curent_oxygen < REQUIRED_OXYGEN:
-		var box := pool.pool_colision.shape as BoxShape3D
-		var surface_local := Vector3(0.0, box.size.y / 2.0, 0.0)
-		var surface_global := pool.pool_colision.global_transform * surface_local
-		target = Vector3(next_pos.x, surface_global.y - 0.08, next_pos.z)
-		movement_speed *= SURFACE_SPEED_MULTIPLIER
-	elif current_state == states.DAMAGET:
+	if current_state == states.DAMAGET:
 		movement_speed *= 0.5
 
-	var movement := target - global_position
+	var movement := next_pos - global_position
 	if movement.length_squared() > 0.0001:
 		# Модель рыбы вытянута вдоль локальной оси X, поэтому
 		# разворачиваем её продольную ось по горизонтальному направлению движения.
@@ -123,7 +133,7 @@ func fish_logic(delta: float) -> void:
 			var target_rotation := atan2(-horizontal_direction.y, horizontal_direction.x)
 			rotation.y = rotate_toward(rotation.y, target_rotation, TURN_SPEED * delta)
 
-	global_position = global_position.move_toward(target, movement_speed * delta)
+	global_position = global_position.move_toward(next_pos, movement_speed * delta)
 
 
 func choise() -> void:
