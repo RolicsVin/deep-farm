@@ -39,6 +39,9 @@ func _ready() -> void:
 	if not pool_timer.timeout.is_connected(_make_stable):
 		pool_timer.timeout.connect(_make_stable)
 
+	# Экономика учитывает доход только после полной автоматизации бассейна.
+	Economy.register_pool(self)
+
 	# Проверяем начальное состояние после инициализации параметров.
 	_update_recovery_state()
 
