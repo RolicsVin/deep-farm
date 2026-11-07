@@ -23,14 +23,22 @@ func open_database() -> bool:
 		return false
 
 	is_open = true
-	if not db.query("""
-		CREATE TABLE IF NOT EXISTS game_save (
+
+	var metadata_table_ok := db.query("""
+		CREATE TABLE IF NOT EXISTS save_metadata (
 			id INTEGER PRIMARY KEY CHECK (id = 1),
-			saved_at INTEGER NOT NULL,
-			modules_json TEXT NOT NULL
+			saved_at INTEGER NOT NULL
 		);
-	"""):
-		push_error("DatabaseTools: не удалось создать таблицу game_save. " + db.error_message)
+	""")
+	var module_table_ok := db.query("""
+		CREATE TABLE IF NOT EXISTS module_data (
+			module_name TEXT PRIMARY KEY,
+			data_json TEXT NOT NULL
+		);
+	""")
+
+	if not metadata_table_ok or not module_table_ok:
+		push_error("DatabaseTools: не удалось создать таблицы сохранения. " + db.error_message)
 		db.close_db()
 		is_open = false
 		return false
@@ -42,20 +50,34 @@ func save_game_data(modules: Dictionary, saved_at: int) -> bool:
 	if not open_database():
 		return false
 
-	var modules_json := JSON.stringify(modules)
 	if not db.query("BEGIN TRANSACTION;"):
 		push_error("DatabaseTools: не удалось начать транзакцию сохранения. " + db.error_message)
 		return false
 
-	var query_ok := db.query_with_bindings(
-		"INSERT OR REPLACE INTO game_save (id, saved_at, modules_json) VALUES (1, ?, ?);",
-		[saved_at, modules_json]
+	var metadata_ok := db.query_with_bindings(
+		"INSERT OR REPLACE INTO save_metadata (id, saved_at) VALUES (1, ?);",
+		[saved_at]
 	)
-
-	if not query_ok:
+	if not metadata_ok:
 		db.query("ROLLBACK;")
-		push_error("DatabaseTools: не удалось записать данные игры. " + db.error_message)
+		push_error("DatabaseTools: не удалось записать время сохранения. " + db.error_message)
 		return false
+
+	if not db.query("DELETE FROM module_data;"):
+		db.query("ROLLBACK;")
+		push_error("DatabaseTools: не удалось очистить старые данные модулей. " + db.error_message)
+		return false
+
+	for module_name in modules:
+		var module_json := JSON.stringify(modules[module_name])
+		var module_ok := db.query_with_bindings(
+			"INSERT INTO module_data (module_name, data_json) VALUES (?, ?);",
+			[str(module_name), module_json]
+		)
+		if not module_ok:
+			db.query("ROLLBACK;")
+			push_error("DatabaseTools: не удалось сохранить модуль '%s'. %s" % [module_name, db.error_message])
+			return false
 
 	if not db.query("COMMIT;"):
 		db.query("ROLLBACK;")
@@ -70,25 +92,33 @@ func load_game_data() -> Dictionary:
 	if not open_database():
 		return {}
 
-	if not db.query("SELECT saved_at, modules_json FROM game_save WHERE id = 1;"):
-		push_error("DatabaseTools: ошибка чтения сохранения. " + db.error_message)
+	if not db.query("SELECT saved_at FROM save_metadata WHERE id = 1;"):
+		push_error("DatabaseTools: ошибка чтения метаданных сохранения. " + db.error_message)
 		return {}
 
 	if db.query_result.is_empty():
 		last_load_success = true
 		return {}
 
-	var row: Dictionary = db.query_result[0]
-	var json := JSON.new()
-	var parse_error := json.parse(str(row.get("modules_json", "{}")))
-	if parse_error != OK or not json.data is Dictionary:
-		push_error("DatabaseTools: сохранение содержит некорректный JSON.")
+	var saved_at := int(db.query_result[0].get("saved_at", 0))
+	if not db.query("SELECT module_name, data_json FROM module_data;"):
+		push_error("DatabaseTools: ошибка чтения данных модулей. " + db.error_message)
 		return {}
+
+	var modules: Dictionary = {}
+	for row in db.query_result:
+		var module_name := str(row.get("module_name", ""))
+		var json := JSON.new()
+		var parse_error := json.parse(str(row.get("data_json", "{}")))
+		if parse_error != OK or not json.data is Dictionary:
+			push_error("DatabaseTools: некорректные данные модуля '%s'." % module_name)
+			return {}
+		modules[module_name] = json.data
 
 	last_load_success = true
 	return {
-		"saved_at": int(row.get("saved_at", 0)),
-		"modules": json.data
+		"saved_at": saved_at,
+		"modules": modules
 	}
 
 
