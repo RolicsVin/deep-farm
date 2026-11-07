@@ -1,29 +1,34 @@
 ## Модуль экономики. Создаётся ядром через Core._make_tool().
-## Не работает с файловой системой: данные получает от ядра и возвращает ядру.
+## Не обращается к файловой системе или SQL: только передаёт ядру данные.
 class_name EconomyTools extends Node
 
 signal updated(balance: int, pending_income: int, income_per_minute: float)
 signal offline_income_received(amount: int)
 
-var data: EconomyData = EconomyData.new()
+var data: Dictionary = {
+	"balance": 0,
+	"pending_income": 0,
+	"offline_income": 0,
+	"pool_states": {}
+}
 var _registered_pools: Array[Pool] = []
 var _fractional_income: float = 0.0
 
 var balance: int:
 	get:
-		return data.balance
+		return int(data.get("balance", 0))
 
 var pending_income: int:
 	get:
-		return data.pending_income
+		return int(data.get("pending_income", 0))
 
 var income_per_minute: float:
 	get:
-		return data.income_per_minute
+		return float(data.get("income_per_minute", 0.0))
 
 var offline_income: int:
 	get:
-		return data.offline_income
+		return int(data.get("offline_income", 0))
 
 
 func _process(delta: float) -> void:
@@ -33,7 +38,7 @@ func _process(delta: float) -> void:
 	_fractional_income += income_per_minute * delta / 60.0
 	var whole_income := int(floor(_fractional_income))
 	if whole_income > 0:
-		data.pending_income += whole_income
+		data["pending_income"] = pending_income + whole_income
 		_fractional_income -= whole_income
 		updated.emit(balance, pending_income, income_per_minute)
 
@@ -66,7 +71,7 @@ func _recalculate_income() -> void:
 			continue
 		new_income += _get_pool_income(pool)
 
-	data.income_per_minute = new_income
+	data["income_per_minute"] = new_income
 	updated.emit(balance, pending_income, income_per_minute)
 
 
@@ -75,37 +80,42 @@ func collect_income() -> int:
 	if collected <= 0:
 		return 0
 
-	data.balance += collected
-	data.pending_income = 0
+	data["balance"] = balance + collected
+	data["pending_income"] = 0
 	updated.emit(balance, pending_income, income_per_minute)
 	return collected
 
 
-## Ядро вызывает этот метод при сохранении и включает результат в общий файл.
-func get_save_data() -> EconomyData:
-	data.pool_states.clear()
-	data.automated_pool_paths.clear()
-
+## Ядро получает эти данные и сохраняет их в SQLite.
+func get_save_data() -> Dictionary:
+	var pool_states: Dictionary = {}
 	for pool in _registered_pools:
 		if not is_instance_valid(pool):
 			continue
-		var pool_path := str(pool.get_path())
-		data.pool_states[pool_path] = pool.get_save_data()
-		if pool.get_state() == Pool.states.NORMAL:
-			data.automated_pool_paths.append(pool_path)
+		pool_states[str(pool.get_path())] = pool.get_save_data()
 
-	return data
+	return {
+		"balance": balance,
+		"pending_income": pending_income,
+		"offline_income": offline_income,
+		"pool_states": pool_states
+	}
 
 
-## Ядро передаёт сюда данные модуля и время, прошедшее с последнего сохранения.
-func load_data(saved_data: Resource, offline_seconds: int = 0) -> void:
-	if saved_data is EconomyData:
-		data = saved_data as EconomyData
+## Ядро передаёт данные из SQLite и длительность отсутствия игрока.
+func load_data(saved_data: Variant, offline_seconds: int = 0) -> void:
+	if saved_data is Dictionary:
+		data["balance"] = int(saved_data.get("balance", 0))
+		data["pending_income"] = int(saved_data.get("pending_income", 0))
+		data["offline_income"] = int(saved_data.get("offline_income", 0))
+		data["pool_states"] = saved_data.get("pool_states", {})
 	else:
-		data = EconomyData.new()
+		data["balance"] = 0
+		data["pending_income"] = 0
+		data["offline_income"] = 0
+		data["pool_states"] = {}
 
-	var legacy_rate := maxf(0.0, data.income_per_minute)
-	var has_pool_snapshots := not data.pool_states.is_empty()
+	var saved_pool_states: Dictionary = data.get("pool_states", {})
 	var offline_earned := 0.0
 
 	for pool in _registered_pools:
@@ -113,37 +123,32 @@ func load_data(saved_data: Resource, offline_seconds: int = 0) -> void:
 			continue
 
 		var pool_path := str(pool.get_path())
-		if has_pool_snapshots and data.pool_states.has(pool_path):
-			var pool_snapshot: Dictionary = data.pool_states[pool_path]
-			var saved_state := int(pool_snapshot.get("state", Pool.states.RECOVERED))
-			var remaining := maxf(0.0, float(pool_snapshot.get("stabilization_remaining", 0.0)))
-			var fish_income := _get_pool_income(pool)
+		if not saved_pool_states.has(pool_path):
+			continue
 
-			if saved_state == Pool.states.NORMAL:
-				offline_earned += fish_income * float(offline_seconds) / 60.0
+		var pool_snapshot: Dictionary = saved_pool_states[pool_path]
+		var saved_state := int(pool_snapshot.get("state", Pool.states.RECOVERED))
+		var remaining := maxf(0.0, float(pool_snapshot.get("stabilization_remaining", 0.0)))
+		var fish_income := _get_pool_income(pool)
+
+		if saved_state == Pool.states.NORMAL:
+			offline_earned += fish_income * float(offline_seconds) / 60.0
+			pool.restore_saved_state(Pool.states.NORMAL, 0.0, pool_snapshot)
+		elif saved_state == Pool.states.STABILISATION:
+			if float(offline_seconds) >= remaining:
+				offline_earned += fish_income * (float(offline_seconds) - remaining) / 60.0
 				pool.restore_saved_state(Pool.states.NORMAL, 0.0, pool_snapshot)
-			elif saved_state == Pool.states.STABILISATION:
-				if float(offline_seconds) >= remaining:
-					offline_earned += fish_income * (float(offline_seconds) - remaining) / 60.0
-					pool.restore_saved_state(Pool.states.NORMAL, 0.0, pool_snapshot)
-				else:
-					pool.restore_saved_state(Pool.states.STABILISATION, remaining - float(offline_seconds), pool_snapshot)
 			else:
-				pool.restore_saved_state(saved_state, 0.0, pool_snapshot)
-		elif not has_pool_snapshots and data.automated_pool_paths.has(pool_path):
-			# Старый формат хранил только список работающих бассейнов и общую ставку.
-			pool.restore_saved_state(Pool.states.NORMAL, 0.0)
-
-	if not has_pool_snapshots and offline_seconds > 0:
-		offline_earned = legacy_rate * float(offline_seconds) / 60.0
+				pool.restore_saved_state(Pool.states.STABILISATION, remaining - float(offline_seconds), pool_snapshot)
+		else:
+			pool.restore_saved_state(saved_state, 0.0, pool_snapshot)
 
 	var earned := int(floor(offline_earned))
 	if earned > 0:
-		data.pending_income += earned
-		data.offline_income += earned
+		data["pending_income"] = pending_income + earned
+		data["offline_income"] = offline_income + earned
 		offline_income_received.emit(earned)
 
-	data.last_saved_at = int(Time.get_unix_time_from_system())
 	_recalculate_income()
 	updated.emit(balance, pending_income, income_per_minute)
 
