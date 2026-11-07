@@ -2,7 +2,11 @@
 
 [ext_resource type="Script" uid="uid://dpd55axow2fj2" path="res://core/classes/gameplay/fish.gd" id="1_uj3kj"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uj3kj"]
+albedo_color = Color(0.5962718, 0.09888411, 2.4065375e-07, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_hf7dp"]
+material = SubResource("StandardMaterial3D_uj3kj")
 size = Vector3(0.3154297, 0.103515625, 0.123046875)
 
 [node name="Fish" type="CharacterBody3D" unique_id=1291533318 node_paths=PackedStringArray("brain_timer")]

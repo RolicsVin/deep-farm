@@ -16,6 +16,9 @@ albedo_color = Color(0.14901961, 0.43137255, 0.5568628, 0.43529412)
 material = SubResource("StandardMaterial3D_hpfcs")
 size = Vector3(2, 1.7719727, 2)
 
+[sub_resource type="BoxMesh" id="BoxMesh_w1h7m"]
+size = Vector3(2, 2, 2)
+
 [node name="Pool" type="Node3D" unique_id=1331871361 node_paths=PackedStringArray("camera_pos", "pool_colision", "water", "pool_timer")]
 script = ExtResource("1_hpfcs")
 camera_pos = NodePath("Marker3D")
@@ -57,3 +60,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8859863, 0.02381885)
 mesh = SubResource("BoxMesh_fqxyq")
 
 [node name="Timer" type="Timer" parent="." unique_id=122384076]
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="." unique_id=1691753003]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0)
+mesh = SubResource("BoxMesh_w1h7m")
+
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="." unique_id=717171430]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
+mesh = SubResource("BoxMesh_w1h7m")
