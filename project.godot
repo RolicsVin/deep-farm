@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="deep farm"
-run/main_scene="uid://b4tenftp5x6ly"
+run/main_scene="uid://bbj15gydsuseh"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://icon.svg"
 
