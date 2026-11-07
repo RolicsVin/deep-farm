@@ -129,7 +129,7 @@ func get_save_data() -> Dictionary:
 
 
 ## Восстанавливает состояние бассейна. Офлайн-время уже вычтено модулем экономики.
-func restore_saved_state(saved_state: states, stabilization_remaining: float = 0.0, snapshot: Dictionary = {}) -> void:
+func restore_saved_state(saved_state: int, stabilization_remaining: float = 0.0, snapshot: Dictionary = {}) -> void:
 	if snapshot.has("temperature"):
 		curent_temperature = int(snapshot["temperature"])
 	if snapshot.has("filtration"):
@@ -149,7 +149,13 @@ func restore_saved_state(saved_state: states, stabilization_remaining: float = 0
 	elif saved_state == states.STABILISATION or saved_state == states.NORMAL:
 		curent_state = states.NORMAL
 	else:
-		curent_state = saved_state
+		match saved_state:
+			states.DEFEAT:
+				curent_state = states.DEFEAT
+			states.RECOVERED:
+				curent_state = states.RECOVERED
+			_:
+				curent_state = states.RECOVERED
 
 	state_change.emit(curent_state)
 	if curent_state == states.NORMAL:
