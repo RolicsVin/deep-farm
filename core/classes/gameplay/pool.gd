@@ -120,12 +120,25 @@ func get_save_data() -> Dictionary:
 
 	return {
 		"state": int(curent_state),
-		"stabilization_remaining": remaining
+		"stabilization_remaining": remaining,
+		"temperature": curent_temperature,
+		"filtration": curent_filtration,
+		"oxygen": curent_oxygen,
+		"feeding": curent_feeding
 	}
 
 
 ## Восстанавливает состояние бассейна. Офлайн-время уже вычтено модулем экономики.
-func restore_saved_state(saved_state: states, stabilization_remaining: float = 0.0) -> void:
+func restore_saved_state(saved_state: int, stabilization_remaining: float = 0.0, snapshot: Dictionary = {}) -> void:
+	if snapshot.has("temperature"):
+		curent_temperature = int(snapshot["temperature"])
+	if snapshot.has("filtration"):
+		curent_filtration = float(snapshot["filtration"])
+	if snapshot.has("oxygen"):
+		curent_oxygen = float(snapshot["oxygen"])
+	if snapshot.has("feeding"):
+		curent_feeding = int(snapshot["feeding"])
+
 	if is_instance_valid(pool_timer):
 		pool_timer.stop()
 
