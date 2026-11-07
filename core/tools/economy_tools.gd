@@ -98,7 +98,8 @@ func get_save_data() -> Dictionary:
 		"balance": balance,
 		"pending_income": pending_income,
 		"offline_income": offline_income,
-		"pool_states": pool_states
+		"pool_states": pool_states,
+		"fractional_income": _fractional_income
 	}
 
 
@@ -109,11 +110,13 @@ func load_data(saved_data: Variant, offline_seconds: int = 0) -> void:
 		data["pending_income"] = int(saved_data.get("pending_income", 0))
 		data["offline_income"] = int(saved_data.get("offline_income", 0))
 		data["pool_states"] = saved_data.get("pool_states", {})
+		_fractional_income = float(saved_data.get("fractional_income", 0.0))
 	else:
 		data["balance"] = 0
 		data["pending_income"] = 0
 		data["offline_income"] = 0
 		data["pool_states"] = {}
+		_fractional_income = 0.0
 
 	var saved_pool_states: Dictionary = data.get("pool_states", {})
 	var offline_earned := 0.0
