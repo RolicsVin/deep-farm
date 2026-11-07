@@ -39,16 +39,11 @@ func _ready() -> void:
 	if not pool_timer.timeout.is_connected(_make_stable):
 		pool_timer.timeout.connect(_make_stable)
 
-	# Экономика учитывает доход только после полной автоматизации бассейна.
 	Core.economy_tools.register_pool(self)
-
-	# Проверяем начальное состояние после инициализации параметров.
 	_update_recovery_state()
 
 
 func _process(_delta: float) -> void:
-	# До стабилизации состояние всегда соответствует текущим параметрам.
-	# STABILISATION и NORMAL являются отдельными этапами прогрессии.
 	_update_recovery_state()
 
 
@@ -115,3 +110,34 @@ func _make_stable() -> void:
 	curent_state = states.NORMAL
 	state_change.emit(curent_state)
 	reovered.emit()
+
+
+## Снимок состояния бассейна для общего сохранения, управляемого ядром.
+func get_save_data() -> Dictionary:
+	var remaining := 0.0
+	if curent_state == states.STABILISATION and is_instance_valid(pool_timer):
+		remaining = pool_timer.time_left
+
+	return {
+		"state": int(curent_state),
+		"stabilization_remaining": remaining
+	}
+
+
+## Восстанавливает состояние бассейна. Офлайн-время уже вычтено модулем экономики.
+func restore_saved_state(saved_state: states, stabilization_remaining: float = 0.0) -> void:
+	if is_instance_valid(pool_timer):
+		pool_timer.stop()
+
+	if saved_state == states.STABILISATION and stabilization_remaining > 0.0:
+		curent_state = states.STABILISATION
+		if is_instance_valid(pool_timer):
+			pool_timer.start(stabilization_remaining)
+	elif saved_state == states.STABILISATION or saved_state == states.NORMAL:
+		curent_state = states.NORMAL
+	else:
+		curent_state = saved_state
+
+	state_change.emit(curent_state)
+	if curent_state == states.NORMAL:
+		reovered.emit()
