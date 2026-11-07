@@ -35,6 +35,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0)
 [node name="Pool4" parent="." unique_id=1658464137 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 0)
 
+[node name="Fish2" parent="Pool2" node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
+pool = NodePath("..")
+
+[node name="Fish3" parent="Pool3" node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
+pool = NodePath("..")
+
+[node name="Fish4" parent="Pool4" node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
+pool = NodePath("..")
+
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1862812048 node_paths=PackedStringArray("pools", "ui")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0.9996164, -2.4214544)
 script = ExtResource("2_tqkkf")
