@@ -68,6 +68,10 @@ func save_data() -> void:
 
 func load_data() -> void:
 	var save_record := database_tools.load_game_data()
+	if not database_tools.last_load_success:
+		push_error("Core: загрузка сохранения из SQLite не удалась. Игра продолжит работу без перезаписи базы.")
+		return
+
 	var modules_data: Dictionary = save_record.get("modules", {})
 	var saved_at := int(save_record.get("saved_at", 0))
 	var elapsed := 0
