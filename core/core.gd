@@ -83,12 +83,15 @@ func load_data() -> void:
 		elapsed = maxi(0, int(Time.get_unix_time_from_system()) - save_resource.saved_at)
 	else:
 		# Однократная совместимость с прежним сохранением экономики.
-		var legacy_data := ResourceLoader.load(LEGACY_ECONOMY_SAVE_PATH) as EconomyData
+		var legacy_data: EconomyData
+		if ResourceLoader.exists(LEGACY_ECONOMY_SAVE_PATH):
+			legacy_data = ResourceLoader.load(LEGACY_ECONOMY_SAVE_PATH) as EconomyData
 		if is_instance_valid(legacy_data):
 			save_resource = CoreSaveData.new()
 			save_resource.saved_at = legacy_data.last_saved_at
 			save_resource.modules["Economy"] = legacy_data
-			elapsed = legacy_data.last_saved_at > 0 ? maxi(0, int(Time.get_unix_time_from_system()) - legacy_data.last_saved_at) : 0
+			if legacy_data.last_saved_at > 0:
+				elapsed = maxi(0, int(Time.get_unix_time_from_system()) - legacy_data.last_saved_at)
 		else:
 			save_resource = CoreSaveData.new()
 
