@@ -13,13 +13,20 @@ var _save_elapsed: float = 0.0
 var _fractional_income: float = 0.0
 
 var balance: int:
-	get: return data.balance
+	get:
+		return data.balance
+
 var pending_income: int:
-	get: return data.pending_income
+	get:
+		return data.pending_income
+
 var income_per_minute: float:
-	get: return data.income_per_minute
+	get:
+		return data.income_per_minute
+
 var offline_income: int:
-	get: return data.offline_income
+	get:
+		return data.offline_income
 
 
 func _ready() -> void:
@@ -111,15 +118,36 @@ func _apply_offline_income() -> void:
 
 
 func _load_data() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		data.last_saved_at = int(Time.get_unix_time_from_system())
-		return
-	var loaded_data := ResourceLoader.load(SAVE_PATH) as EconomyData
-	if not is_instance_valid(loaded_data):
+	if FileAccess.file_exists(SAVE_PATH):
+		var loaded_data := ResourceLoader.load(SAVE_PATH) as EconomyData
+		if is_instance_valid(loaded_data):
+			data = loaded_data
+			return
 		push_error("EconomyTools: не удалось загрузить данные экономики.")
+	else:
+		_migrate_legacy_save()
+
+	if data.last_saved_at <= 0:
 		data.last_saved_at = int(Time.get_unix_time_from_system())
+
+
+func _migrate_legacy_save() -> void:
+	# Переносим сохранение из первой версии экономики на ConfigFile.
+	const LEGACY_SAVE_PATH := "user://economy.cfg"
+	if not FileAccess.file_exists(LEGACY_SAVE_PATH):
 		return
-	data = loaded_data
+
+	var config := ConfigFile.new()
+	if config.load(LEGACY_SAVE_PATH) != OK:
+		push_warning("EconomyTools: старое сохранение найдено, но прочитать его не удалось.")
+		return
+
+	data.balance = maxi(0, int(config.get_value("economy", "balance", 0)))
+	data.pending_income = maxi(0, int(config.get_value("economy", "pending_income", 0)))
+	data.income_per_minute = maxf(0.0, float(config.get_value("economy", "income_per_minute", 0.0)))
+	data.automated_pool_paths = config.get_value("economy", "automated_pool_paths", PackedStringArray())
+	data.last_saved_at = int(config.get_value("economy", "last_saved_at", 0))
+	_save_data()
 
 
 func _save_data() -> void:
