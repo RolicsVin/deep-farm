@@ -144,7 +144,7 @@ func load_data(saved_data: Variant, offline_seconds: int = 0) -> void:
 			else:
 				pool.restore_saved_state(Pool.states.STABILISATION, remaining - float(offline_seconds), pool_snapshot)
 		else:
-			pool.restore_saved_state(saved_state as Pool.states, 0.0, pool_snapshot)
+			pool.restore_saved_state(saved_state, 0.0, pool_snapshot)
 
 	var earned := int(floor(offline_earned))
 	if earned > 0:
