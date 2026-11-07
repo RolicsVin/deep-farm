@@ -49,6 +49,10 @@ pool = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.43128434, 0.57114506, -0.2495653)
 pool = NodePath("..")
 
+[node name="Fish2" parent="Pool2" unique_id=1339335684 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
+pool = NodePath("..")
+
 [node name="Pool3" parent="." unique_id=457913886 instance=ExtResource("1_sxf4j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0)
 
@@ -58,6 +62,10 @@ pool = NodePath("..")
 
 [node name="Fish7" parent="Pool3" unique_id=768007470 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35051647, 0.5028181, 0.2770384)
+pool = NodePath("..")
+
+[node name="Fish3" parent="Pool3" unique_id=1538460088 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
 pool = NodePath("..")
 
 [node name="Pool4" parent="." unique_id=1658464137 instance=ExtResource("1_sxf4j")]
@@ -75,15 +83,7 @@ pool = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.46410963, 0.21720791, 0.2770384)
 pool = NodePath("..")
 
-[node name="Fish2" parent="Pool2" node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
-pool = NodePath("..")
-
-[node name="Fish3" parent="Pool3" node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
-pool = NodePath("..")
-
-[node name="Fish4" parent="Pool4" node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
+[node name="Fish4" parent="Pool4" unique_id=213608573 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.21238112, 0)
 pool = NodePath("..")
 
