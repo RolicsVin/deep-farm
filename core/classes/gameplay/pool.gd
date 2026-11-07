@@ -1,111 +1,114 @@
-## Класс, реализующий логику бассейна. Смотрите README.md в разделе 2. Геймдизайн. 
-## Бассейн хранит в себе рыбок. Если с бассейном всё хорошо он даёт деньги, иначе не даёт. 
-## Если что-то не так это визуально отображается на бассейне. 
-
-## DEFEAT - Разрушен. Дохода нет. 
-## RECOVERED - Востановлен. Доход маленький. 
-## STABILISATION - Стабилизируется. 
-## NORMAL - В норме. Доход полный. 
+## Класс, реализующий логику бассейна.
+## Бассейн хранит рыб и определяет своё состояние по параметрам среды.
 class_name Pool extends Node3D
 
-enum states {DEFEAT, RECOVERED, STABILISATION, NORMAL} ## виды состояний бассейна
+enum states {DEFEAT, RECOVERED, STABILISATION, NORMAL}
 
-@export var curent_state: states = states.RECOVERED ## Состояние бассейна
+const TEMPERATURE_TOLERANCE := 2
 
-@export_group('characteristics')
-@export var curent_temperature: int = 20 ## Текущая температура в бассейне
-@export var curent_filtration: float = 0.9 ## Индекс фильтрация грязи
-@export var curent_oxygen: float = 0.98 ## Индекс количества кислорода в воде
-@export var curent_feeding: int = 5 ## Текущая подача питания в бассейне
+@export var curent_state: states = states.RECOVERED
 
-@export var time_stabilization: int = 600 ## Время стабилизации в сек.
+@export_group("characteristics")
+@export var curent_temperature: int = 20
+@export var curent_filtration: float = 0.9
+@export var curent_oxygen: float = 0.98
+@export var curent_feeding: int = 5
 
-@export_group('dependies')
-@export var camera_pos: Marker3D ## Куда будет двигатся камера
-@export var pool_colision: CollisionShape3D ## Область, в пределах которой может передвигатся рыба
+@export var time_stabilization: int = 600
 
-@export var water: MeshInstance3D ## меш воды
-@export var pool_timer: Timer ## таймер
+@export_group("dependies")
+@export var camera_pos: Marker3D
+@export var pool_colision: CollisionShape3D
+@export var water: MeshInstance3D
+@export var pool_timer: Timer
 
-signal state_change(state: Pool.states) ## Издаётся при смене состояния
-signal reovered ## Издаётся, когда бассейн востановлен
+signal state_change(state: Pool.states)
+signal reovered
 
 
 func _ready() -> void:
-	if not pool_colision.shape is BoxShape3D:
-		Core.push_fatal_error('Класс Pool поддерживает только BoxShape3D. Другие виды форм не поддерживаются.')
-	
-	# Настройки таймера
+	if not is_instance_valid(pool_colision) or not pool_colision.shape is BoxShape3D:
+		Core.push_fatal_error("Класс Pool поддерживает только BoxShape3D. Другие виды форм не поддерживаются.")
+
+	if not is_instance_valid(pool_timer):
+		push_error("Pool: не назначен pool_timer.")
+		return
+
 	pool_timer.one_shot = true
 	pool_timer.stop()
-	pool_timer.timeout.connect(_make_stable)
+	if not pool_timer.timeout.is_connected(_make_stable):
+		pool_timer.timeout.connect(_make_stable)
+
+	# Проверяем начальное состояние после инициализации параметров.
+	_update_recovery_state()
 
 
 func _process(_delta: float) -> void:
-	# Логика при состоянии
-	match curent_state:
-		states.DEFEAT:
-			# Проверка на возможность востановления
-			
-			# подсчёт нарушений
-			var counter: int = 0
-			
-			if curent_temperature < Fish.REQUIRED_TEMPERATURE:
-				counter += 1
-			
-			if curent_filtration < Fish.REQUIRED_FILTRATION:
-				counter += 1
-			
-			if curent_oxygen < Fish.REQUIRED_OXYGEN:
-				counter += 1
-			
-			if curent_feeding < Fish.REQUIRED_FEEDING:
-				counter += 1
-			
-			# установка состояния
-			if counter == 0:
-				curent_state = states.RECOVERED
-				state_change.emit(curent_state)
-		
-		states.RECOVERED:
-			# Восстановлен
-			pass
-		
-		states.NORMAL:
-			# В порядке
-			pass
-	
-	# Обновление вида бассейна в соответствии с симптомами
-	pass # типо какая-то логика на будущее
+	# До стабилизации состояние всегда соответствует текущим параметрам.
+	# STABILISATION и NORMAL являются отдельными этапами прогрессии.
+	_update_recovery_state()
 
 
-func pick_random_point() -> Vector3: ## Возвращает случайную точку внутри коллайдера в глобальных координатах.
+func _has_valid_parameters() -> bool:
+	var temperature_is_valid := (
+		curent_temperature >= Fish.REQUIRED_TEMPERATURE - TEMPERATURE_TOLERANCE
+		and curent_temperature <= Fish.REQUIRED_TEMPERATURE + TEMPERATURE_TOLERANCE
+	)
+
+	return (
+		temperature_is_valid
+		and curent_filtration >= Fish.REQUIRED_FILTRATION
+		and curent_oxygen >= Fish.REQUIRED_OXYGEN
+		and curent_feeding >= Fish.REQUIRED_FEEDING
+	)
+
+
+func _update_recovery_state() -> void:
+	if curent_state != states.DEFEAT and curent_state != states.RECOVERED:
+		return
+
+	var next_state := states.RECOVERED if _has_valid_parameters() else states.DEFEAT
+	if next_state == curent_state:
+		return
+
+	curent_state = next_state
+	state_change.emit(curent_state)
+
+
+func pick_random_point() -> Vector3:
 	var box := pool_colision.shape as BoxShape3D
 	var local_point := Vector3(
 		randf_range(-box.size.x / 2.0, box.size.x / 2.0),
 		randf_range(-box.size.y / 2.0, box.size.y / 2.0),
 		randf_range(-box.size.z / 2.0, box.size.z / 2.0)
 	)
-
-	# Преобразуем точку из локального пространства CollisionShape3D
-	# в глобальное. Это учитывает позицию, поворот и масштаб бассейна.
 	return pool_colision.global_transform * local_point
 
 
-func get_state() -> states: ## Вернёт состояние бассейна
+func get_state() -> states:
 	return curent_state
 
 
-func spawn_fish() -> void: ## создаст рыбу в бассейне
+func spawn_fish() -> void:
 	pass
 
 
-func start_stabilization() -> void: ## Начнёт стабилизирование бассейна
+func start_stabilization() -> void:
+	if curent_state != states.RECOVERED:
+		return
+	if not is_instance_valid(pool_timer):
+		push_error("Pool: невозможно начать стабилизацию — pool_timer не назначен.")
+		return
+
 	curent_state = states.STABILISATION
+	state_change.emit(curent_state)
 	pool_timer.start(time_stabilization)
 
 
-func _make_stable() -> void: ## Переведёт бассейн в стабильнео состояние
+func _make_stable() -> void:
+	if curent_state != states.STABILISATION:
+		return
+
 	curent_state = states.NORMAL
 	state_change.emit(curent_state)
 	reovered.emit()
