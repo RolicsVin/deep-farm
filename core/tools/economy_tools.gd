@@ -125,7 +125,7 @@ func load_data(saved_data: Resource, offline_seconds: int = 0) -> void:
 			elif saved_state == Pool.states.STABILISATION:
 				if float(offline_seconds) >= remaining:
 					offline_earned += fish_income * (float(offline_seconds) - remaining) / 60.0
-					pool.restore_saved_state(Pool.states.NORMAL, 0.0)
+					pool.restore_saved_state(Pool.states.NORMAL, 0.0, pool_snapshot)
 				else:
 					pool.restore_saved_state(Pool.states.STABILISATION, remaining - float(offline_seconds), pool_snapshot)
 			else:
