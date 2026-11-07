@@ -31,7 +31,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35347548, 0.71801186, 0.430
 pool = NodePath("..")
 
 [node name="Fish3" parent="Pool" unique_id=287971142 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2900056, 0.21238112, 0.64208025)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32398033, 0.21238112, 0.64208025)
 pool = NodePath("..")
 
 [node name="Fish4" parent="Pool" unique_id=638631944 node_paths=PackedStringArray("pool") instance=ExtResource("2_a2pkv")]
