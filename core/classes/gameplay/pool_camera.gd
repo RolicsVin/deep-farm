@@ -51,7 +51,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func _begin_swipe(pos: Vector2) -> void:
 	_swipe_start = pos
 	# Вертикальный жест над меню не должен переключать бассейны.
-	_swiping = not (is_instance_valid(ui) and ui.is_point_over_panel(pos))
+	_swiping = not (
+		is_instance_valid(ui)
+		and ui.has_method("is_point_over_panel")
+		and bool(ui.call("is_point_over_panel", pos))
+	)
 
 
 func _end_swipe(pos: Vector2) -> void:
