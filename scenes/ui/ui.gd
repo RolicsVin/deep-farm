@@ -129,7 +129,7 @@ func update_states() -> void:
 	$Panel/VBoxContainer/o.set_value_no_signal(pool.curent_oxygen * 100.0)
 	$Panel/VBoxContainer/feething.set_value_no_signal(pool.curent_feeding)
 
-	var is_editable := pool.get_state() == Pool.states.DEFEAT
+	var is_editable := pool.get_state() in [Pool.states.DEFEAT, Pool.states.RECOVERED]
 	$Panel/VBoxContainer/t.editable = is_editable
 	$Panel/VBoxContainer/filter.editable = is_editable
 	$Panel/VBoxContainer/o.editable = is_editable
