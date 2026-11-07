@@ -79,12 +79,17 @@ func _process(_delta: float) -> void:
 	pass # типо какая-то логика на будущее
 
 
-func pick_random_point() -> Vector3: ## Вернёт случайную точку из бассейна в глобальных координатах
-	return Vector3(
-		randf_range(-pool_colision.shape.size.x / 2, pool_colision.shape.size.x / 2),
-		randf_range(-pool_colision.shape.size.y / 2, pool_colision.shape.size.y / 2),
-		randf_range(-pool_colision.shape.size.z / 2, pool_colision.shape.size.z / 2)
-	) + pool_colision.global_position
+func pick_random_point() -> Vector3: ## Возвращает случайную точку внутри коллайдера в глобальных координатах.
+	var box := pool_colision.shape as BoxShape3D
+	var local_point := Vector3(
+		randf_range(-box.size.x / 2.0, box.size.x / 2.0),
+		randf_range(-box.size.y / 2.0, box.size.y / 2.0),
+		randf_range(-box.size.z / 2.0, box.size.z / 2.0)
+	)
+
+	# Преобразуем точку из локального пространства CollisionShape3D
+	# в глобальное. Это учитывает позицию, поворот и масштаб бассейна.
+	return pool_colision.global_transform * local_point
 
 
 func get_state() -> states: ## Вернёт состояние бассейна
