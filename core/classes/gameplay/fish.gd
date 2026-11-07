@@ -23,6 +23,9 @@ var current_state = states.NORMAl
 var next_pos: Vector3
 var fish_material: StandardMaterial3D
 
+const SURFACE_SPEED_MULTIPLIER := 0.1
+const TURN_SPEED := 4.0
+
 
 func _ready() -> void:
 	if not is_instance_valid(pool):
@@ -98,19 +101,29 @@ func fish_logic(delta: float) -> void:
 	if pool.curent_filtration < REQUIRED_FILTRATION:
 		movement_speed *= 0.35
 
-	# При нехватке кислорода рыба стремится к поверхности воды.
+	var target := next_pos
+
+	# При нехватке кислорода рыба всплывает и затем медленно дрейфует
+	# у поверхности, словно пассивно плавающее тело.
 	if pool.curent_oxygen < REQUIRED_OXYGEN:
 		var box := pool.pool_colision.shape as BoxShape3D
 		var surface_local := Vector3(0.0, box.size.y / 2.0, 0.0)
 		var surface_global := pool.pool_colision.global_transform * surface_local
-		var target := Vector3(next_pos.x, surface_global.y - 0.08, next_pos.z)
-		global_position = global_position.move_toward(target, movement_speed * delta)
-		return
-
-	if current_state == states.DAMAGET:
+		target = Vector3(next_pos.x, surface_global.y - 0.08, next_pos.z)
+		movement_speed *= SURFACE_SPEED_MULTIPLIER
+	elif current_state == states.DAMAGET:
 		movement_speed *= 0.5
 
-	global_position = global_position.move_toward(next_pos, movement_speed * delta)
+	var movement := target - global_position
+	if movement.length_squared() > 0.0001:
+		# Модель рыбы вытянута вдоль локальной оси X, поэтому
+		# разворачиваем её продольную ось по горизонтальному направлению движения.
+		var horizontal_direction := Vector2(movement.x, movement.z)
+		if horizontal_direction.length_squared() > 0.0001:
+			var target_rotation := atan2(-horizontal_direction.y, horizontal_direction.x)
+			rotation.y = rotate_toward(rotation.y, target_rotation, TURN_SPEED * delta)
+
+	global_position = global_position.move_toward(target, movement_speed * delta)
 
 
 func choise() -> void:
